@@ -15,5 +15,6 @@ int main()
 	MonteCarlo<BaseModel> simulation = MonteCarlo(myModel);
 	
 	cout << simulation.run(10'000) << endl;
+	cout << simulation.run_to_tol(.00001, 10'000'000) << endl;
 	return 0;
 }

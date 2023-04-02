@@ -16,7 +16,7 @@ public:
 
 	MonteCarlo(Model &m);
 	double run(int nsim=100);
-	//double run_to_tol(double tol, int max_sim)
+	double run_to_tol(double tol, int max_sim);
 };
 
 #endif
