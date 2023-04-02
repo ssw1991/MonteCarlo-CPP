@@ -16,5 +16,9 @@ int main()
 	
 	cout << simulation.run(10'000) << endl;
 	cout << simulation.run_to_tol(.00001, 10'000'000) << endl;
+
+	PosModel posModel = PosModel(0.0, 1.0, 1.0);
+	MonteCarlo<PosModel> secondSim = MonteCarlo(posModel);
+	cout << secondSim.run(10'000) << endl;
 	return 0;
 }
