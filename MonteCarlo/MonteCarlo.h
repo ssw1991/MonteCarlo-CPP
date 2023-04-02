@@ -7,8 +7,8 @@
 #include <iostream>
 #include "Model.h"
 
-// TODO: Reference additional headers your program requires here.
-class MonteCarlo {
+template<typename Model>
+class MonteCarlo{
 private:
 	Model model;
 

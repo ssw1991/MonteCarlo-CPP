@@ -3,15 +3,15 @@
 
 #include <random>
 
-class Model {
+class BaseModel {
 private:
 	std::mt19937 rng;
 	double mean;
 	double sigma;
 
 public:
-	Model();
-	Model(double mean, double sigma);
+	BaseModel();
+	BaseModel(double mean, double sigma);
 	double next();
 	double evaluate(double inp);
 };

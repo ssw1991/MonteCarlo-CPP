@@ -2,14 +2,14 @@
 #include <iostream>
 #include <random>
 
-Model::Model() {
+BaseModel::BaseModel() {
 	mean = 0.0;
 	sigma = 1.0;
 	std::random_device rd{};
 	rng = std::mt19937(rd());
 }
 
-Model::Model(double _mean, double _sigma) {
+BaseModel::BaseModel(double _mean, double _sigma) {
 
 	mean = _mean;
 	sigma = _sigma;
@@ -17,8 +17,8 @@ Model::Model(double _mean, double _sigma) {
 	rng = std::mt19937(rd());
 }
 
-double Model::next() {
+double BaseModel::next() {
 	return std::normal_distribution<>(mean, sigma)(rng);
 }
 
-double Model::evaluate(double inp) {return inp;};
+double BaseModel::evaluate(double inp) {return inp;};
