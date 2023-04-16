@@ -9,6 +9,7 @@
 #include <iostream>
 
 
+
 int main() {
 	int NSim = 1'000'000; 
 	int NT = 500; 
@@ -47,10 +48,18 @@ int main() {
 	std::cout << "Down and In put Price: " << PricerDownAndInPut->Price() << std::endl; 
 
 	std::shared_ptr<BarrierPricerFunctional> PricerDownAndInPutFunctional = std::shared_ptr<BarrierPricerFunctional>(new BarrierPricerFunctional(payoffPut, discounter, 55.0, down_and_in));
-	MCMediator<GBM, EulerFdm<GBM>, CPPRng, DownAndInPricer> s3(sde, fdm, rngCPP, PricerDownAndInPut, NSim, NT);
+	MCMediator<GBM, EulerFdm<GBM>, CPPRng, BarrierPricerFunctional> s3(sde, fdm, rngCPP, PricerDownAndInPutFunctional, NSim, NT);
 	s3.start();
 	std::cout << "Down and In put Price with functional approach: " << PricerDownAndInPut->Price() << std::endl;
+	
 
+	std::function<bool(const std::vector<double>&, double)> myDownIn = std::bind(activation, std::placeholders::_1, std::placeholders::_2, Direction::DOWN, false);
+	std::shared_ptr<BarrierPricerFunctional> PricerDownAndInPutFunctionalEnum = std::shared_ptr<BarrierPricerFunctional>(new BarrierPricerFunctional(payoffPut, discounter, 55.0, myDownIn));
+	MCMediator<GBM, EulerFdm<GBM>, CPPRng, BarrierPricerFunctional> s4(sde, fdm, rngCPP, PricerDownAndInPutFunctionalEnum, NSim, NT);
+	s4.start();
+	std::cout << "Down and In put Price with functional approach: " << PricerDownAndInPut->Price() << std::endl;
+
+	
 
 	return 0;
 }

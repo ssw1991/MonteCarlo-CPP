@@ -134,6 +134,25 @@ bool up_and_out(const std::vector<double>& arr, double b) {
 	return active;
 }
 
+enum Direction {
+	UP,
+	DOWN,
+};
 
+bool activation(const std::vector<double>& arr, double b, Direction d, bool init) {
+	bool active = init;
+	for (double val : arr) {
+
+		switch (d) {
+			case DOWN:
+				if (val <= b) { active = !active; break; }
+				break;
+			case UP:
+				if (val >= b) { active = !active; break; }
+				break;
+		}
+	}
+	return active;
+}
 
 #endif
