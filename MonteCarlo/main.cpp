@@ -12,7 +12,7 @@
 int main() {
 	int NSim = 1'000'000; 
 	int NT = 500; 
-	double driftCoefficient = 0.08; 
+	double driftCoefficient = 0.0; 
 	double diffusionCoefficient = 0.3; 
 	double dividendYield = 0.0; 
 	double initialCondition = 60.0; 
@@ -23,8 +23,12 @@ int main() {
 
 	std::function<double(double)> payoffCall = [&K](double x)
 		{return std::max<double>(0.0, x - K); };
+
+	std::function<double(double)> payoffPut = [&K](double x)
+		{return std::max<double>(0.0, K - x); };
+
 	double r = 0.08; 
-	double T = 0.25;
+	double T = 1;
 	std::function<double()> discounter = [&r, &T]() 
 	{ return std::exp(-r * T); };
 	
@@ -35,6 +39,18 @@ int main() {
 	
 	MCMediator<GBM, EulerFdm<GBM>, CPPRng, EuropeanPricer> s2(sde, fdm, rngCPP, pricerCall, NSim, NT);
 	s2.start();
-	std::cout << "\n Call Price: " << pricerCall->Price();
+	std::cout << "\n Call Price: " << pricerCall->Price() << std::endl;
+
+	std::shared_ptr<DownAndInPricer> PricerDownAndInPut = std::shared_ptr<DownAndInPricer>(new DownAndInPricer(payoffPut, discounter, 55.0));
+	MCMediator<GBM, EulerFdm<GBM>, CPPRng, DownAndInPricer> s(sde, fdm, rngCPP, PricerDownAndInPut, NSim, NT);
+	s.start();
+	std::cout << "Down and In put Price: " << PricerDownAndInPut->Price() << std::endl; 
+
+	std::shared_ptr<BarrierPricerFunctional> PricerDownAndInPutFunctional = std::shared_ptr<BarrierPricerFunctional>(new BarrierPricerFunctional(payoffPut, discounter, 55.0, down_and_in));
+	MCMediator<GBM, EulerFdm<GBM>, CPPRng, DownAndInPricer> s3(sde, fdm, rngCPP, PricerDownAndInPut, NSim, NT);
+	s3.start();
+	std::cout << "Down and In put Price with functional approach: " << PricerDownAndInPut->Price() << std::endl;
+
+
 	return 0;
 }

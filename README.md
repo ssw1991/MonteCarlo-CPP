@@ -8,7 +8,7 @@ At its base Monte Carlo is a numerical method providing the integration of funct
 
 This is a simple implementations.
 
--MonteCarlo
+- MonteCarlo
   - Initialized with a model
   - Runs the model over number of simulation and returns the  average
 - Model
@@ -25,3 +25,18 @@ Future progress will be generalizing the model through templates.  To integrate 
 ## Third Session
 
 Implemented the scheme as presented here, written by Daniel Duffy. https://onlinelibrary.wiley.com/doi/epdf/10.1002/wilm.10647.  Will extend from here.
+
+## Fourth Session
+
+Extended pricers to implement European style Barrier options, in two ways.  One useing inheritance.  This required alot of duplication of code.  Though is pretty readable.  However in each class that would be written, the only difference is the activation function.  To simplify this, we have a single barrier option class, that can simply be initalized with an activation function object. We then implement the respective functions.  This can be further simplified by having a single function with signature bool (std::vector<double> arr, double barrier, bool intial, enum direction).  This function can then set the inital condition, loop through the array.  A switch statement off of the enum can determine the operation (<=, or >=) and toggle the return. The activation function can then be created by using std::partial and binding the initial condition, and the enum.  This is also now at the point where a builder can be constructed, as we can price the following
+- European Call
+- European Put
+- Down and out Call
+- Down and out Put
+- Down and in Call
+- Down and in Put
+- Up and out Call
+- Up and out Put
+- Up and in Call
+- Up and in Put
+

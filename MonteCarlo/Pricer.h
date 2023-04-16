@@ -3,6 +3,7 @@
 
 
 #include<functional>
+#include<algorithm>
 
 class PricerBase{
 public:
@@ -27,11 +28,11 @@ public:
 
 // Pricing Engines 
 class EuropeanPricer: public PricerBase{
-private:
+protected:
 	double price;
 	double sum, NSim;
 public:
-	EuropeanPricer() = default;
+	  EuropeanPricer() = default;
 	  EuropeanPricer(const std::function<double(double)>& payoff, const std::function<double()>& discounter) : PricerBase(payoff, discounter) {
 		  price = sum = 0.0; NSim = 0;
 	  }
@@ -50,5 +51,89 @@ public:
 		  return price; 
 	  }
 };
+
+class BarrierPricer: public EuropeanPricer {
+protected:
+	double barrier;
+
+public:
+	BarrierPricer() = default;
+	BarrierPricer(const std::function<double(double)>& payoff, const std::function<double()>& discounter, const double b) : EuropeanPricer(payoff, discounter) { barrier = b; }
+	virtual bool is_active(const std::vector<double>& arr) = 0;
+
+	void ProcessPath(const std::vector<double>& arr) override {
+		if (is_active(arr)) { EuropeanPricer::ProcessPath(arr); }
+		else { NSim++; }  // Simulation was not incremented if this block is hit
+	}
+};
+
+class DownAndInPricer : public BarrierPricer {
+public:
+	DownAndInPricer() = default;
+	DownAndInPricer(const std::function<double(double)>& payoff, const std::function<double()>& discounter, const double b) : BarrierPricer(payoff, discounter, b) {}
+
+	virtual bool is_active(const std::vector<double>& arr) override {
+		bool active = false;
+		for (double val : arr) {
+			if (val <= barrier) { active = true; break; }
+		}
+		return active;
+	}
+
+};
+
+class BarrierPricerFunctional : public EuropeanPricer {
+protected:
+	double barrier; 
+
+public:
+	BarrierPricerFunctional() = default;
+	BarrierPricerFunctional(const std::function<double(double)>& payoff, const std::function<double()>& discounter, const double b, const std::function<bool(const std::vector<double>&, double b)>& active) : EuropeanPricer(payoff, discounter) { is_active = active; barrier = b; }
+	std::function<bool(const std::vector<double>&, double)> is_active;
+
+	void ProcessPath(const std::vector<double>& arr) override {
+		if (is_active(arr, barrier)) { EuropeanPricer::ProcessPath(arr); }
+		else { NSim++; }  // Simulation was not incremented if this block is hit
+	}
+
+};
+
+
+// Functions 
+
+// Perhaps there is a way to generalize more elegantly 
+bool down_and_in(const std::vector<double>& arr, double b) {
+	bool active = false;
+	for (double val : arr) {
+		if (val <= b) { active = true; break; }
+	}
+	return active;
+}
+
+bool down_and_out(const std::vector<double>& arr, double b) {
+	bool active = true;
+	for (double val : arr) {
+		if (val <= b) { active = false; break; }
+	}
+	return active;
+}
+
+bool up_and_in(const std::vector<double>& arr, double b) {
+	bool active = false;
+	for (double val : arr) {
+		if (val >= b) { active = true; break; }
+	}
+	return active;
+}
+
+bool up_and_out(const std::vector<double>& arr, double b) {
+	bool active = true;
+	for (double val : arr) {
+		if (val >= b) { active = false; break; }
+	}
+	return active;
+}
+
+
 
 #endif

@@ -9,7 +9,7 @@ void MCMediator<Sde,Fdm, RNG, Pricer>::start() {
 
 	double Vold, Vnew;
 	for (int i = 1; i <= NSim; i++) {
-		Vold = sde->InitialCondition(); // Why is this in the loop
+		Vold = sde->InitialCondition(); 
 
 		if ((i / 10000) * 10000 == i) {
 			std::cout << i << std::endl;
