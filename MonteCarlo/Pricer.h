@@ -5,7 +5,7 @@
 #include<functional>
 #include<algorithm>
 
-class PricerBase{
+class PricerBase {
 public:
 	// Create a single path
 	virtual void ProcessPath(const std::vector<double>& arr) = 0;
@@ -15,41 +15,51 @@ public:
 	virtual double DiscountFactor() = 0;
 	// Option price
 	virtual double Price() = 0;
+
 	std::function<double(double)> m_payoff;
+
 	std::function<double()> m_discounter;
+
 	PricerBase() = default;
+
 	PricerBase(const std::function<double(double)>& payoff,
-		const std::function<double()>& discounter)
-	{
+		const std::function<double()>& discounter) {
 		m_payoff = payoff;
 		m_discounter = discounter;
 	}
 };
 
 // Pricing Engines 
-class EuropeanPricer: public PricerBase{
+class EuropeanPricer: public PricerBase {
 protected:
 	double price;
 	double sum, NSim;
+
 public:
-	  EuropeanPricer() = default;
-	  EuropeanPricer(const std::function<double(double)>& payoff, const std::function<double()>& discounter) : PricerBase(payoff, discounter) {
-		  price = sum = 0.0; NSim = 0;
-	  }
-	  void ProcessPath(const std::vector<double>& arr) override {
-		  // A path for each simulation/draw// Sum of option values at terminal time T
-		  sum += m_payoff(arr[arr.size() - 1]); NSim++;
-	  }
-	  double DiscountFactor() override {
-		  // Discounting
-		  return m_discounter();
-	  }
-	  void PostProcess() override {
-		  price = DiscountFactor() * sum / NSim;
-	  }
-	  double Price() override {
-		  return price; 
-	  }
+	EuropeanPricer() = default;
+
+	EuropeanPricer(const std::function<double(double)>& payoff, const std::function<double()>& discounter) 
+	: PricerBase(payoff, discounter) {
+		price = sum = 0.0; NSim = 0;
+	}
+
+	void ProcessPath(const std::vector<double>& arr) override {
+		// A path for each simulation/draw// Sum of option values at terminal time T
+		sum += m_payoff(arr[arr.size() - 1]); NSim++;
+	}
+
+	double DiscountFactor() override {
+		// Discounting
+		return m_discounter();
+	}
+
+	void PostProcess() override {
+		price = DiscountFactor() * sum / NSim;
+	}
+
+	double Price() override {
+		return price; 
+	}
 };
 
 class BarrierPricer: public EuropeanPricer {
@@ -58,7 +68,11 @@ protected:
 
 public:
 	BarrierPricer() = default;
-	BarrierPricer(const std::function<double(double)>& payoff, const std::function<double()>& discounter, const double b) : EuropeanPricer(payoff, discounter) { barrier = b; }
+	
+	BarrierPricer(const std::function<double(double)>& payoff, 
+		const std::function<double()>& discounter, const double b) 
+	: EuropeanPricer(payoff, discounter) { barrier = b; }
+
 	virtual bool is_active(const std::vector<double>& arr) = 0;
 
 	void ProcessPath(const std::vector<double>& arr) override {
@@ -70,7 +84,10 @@ public:
 class DownAndInPricer : public BarrierPricer {
 public:
 	DownAndInPricer() = default;
-	DownAndInPricer(const std::function<double(double)>& payoff, const std::function<double()>& discounter, const double b) : BarrierPricer(payoff, discounter, b) {}
+
+	DownAndInPricer(const std::function<double(double)>& payoff, 
+		const std::function<double()>& discounter, const double b) 
+	: BarrierPricer(payoff, discounter, b) {}
 
 	virtual bool is_active(const std::vector<double>& arr) override {
 		bool active = false;
@@ -88,7 +105,15 @@ protected:
 
 public:
 	BarrierPricerFunctional() = default;
-	BarrierPricerFunctional(const std::function<double(double)>& payoff, const std::function<double()>& discounter, const double b, const std::function<bool(const std::vector<double>&, double b)>& active) : EuropeanPricer(payoff, discounter) { is_active = active; barrier = b; }
+
+	BarrierPricerFunctional(const std::function<double(double)>& payoff, 
+		const std::function<double()>& discounter, const double b, 
+		const std::function<bool(const std::vector<double>&, double b)>& active) 
+	: EuropeanPricer(payoff, discounter) { 
+		is_active = active; 
+		barrier = b; 
+	}
+	
 	std::function<bool(const std::vector<double>&, double)> is_active;
 
 	void ProcessPath(const std::vector<double>& arr) override {
