@@ -4,25 +4,27 @@
 #include <memory>
 #include <vector>
 
+using std::shared_ptr;
 
 template<typename Sde, typename Fdm,typename RNG, typename Pricer>
-class MCMediator : private Sde, private Fdm, private RNG, private Pricer
-{
+class MCMediator : private Sde, private Fdm, private RNG, private Pricer {
 private:
-	std::shared_ptr<Sde> sde;
-	std::shared_ptr<Fdm> fdm;
-	std::shared_ptr<RNG> rng;
-	std::shared_ptr<Pricer> pricer;
+	shared_ptr<Sde> sde;
+	shared_ptr<Fdm> fdm;
+	shared_ptr<RNG> rng;
+	shared_ptr<Pricer> pricer;
 
 	int NSim;
 	std::vector<double> res;
 
 public:
 	MCMediator() {};
-	MCMediator(const std::shared_ptr<Sde>& s,
-		const std::shared_ptr<Fdm>& f,
-		const std::shared_ptr<RNG>& r,
-		const std::shared_ptr<Pricer>& p, int n, int NT);
+
+	MCMediator(const shared_ptr<Sde>& s,
+		const shared_ptr<Fdm>& f,
+		const shared_ptr<RNG>& r,
+		const shared_ptr<Pricer>& p, int n, int NT);
+		
 	void start();
 };
 
